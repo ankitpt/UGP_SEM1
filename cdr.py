@@ -19,7 +19,7 @@ Final_Cell_ID INTEGER
 cursor.execute(sql_command)
 df = pandas.read_excel('cdr_raw.xlsx',header=3)
 ndf=df[['StartDate', 'CALL TIME','FIRST_CELL_ID','LAST_CELL_ID']].copy()
-
+ndf=ndf.dropna() 
 #sql_command = """INSERT INTO CDR (Date, Time of communication, Mode of communication,Initial Cell ID,Final Cell ID)
  #   VALUES ( df['StartDate'], df['CALL TIME'],df['TYPE OF CONNECTION'],df['FIRST_CELL_ID'],df['LAST_CELL_ID'] );"""
 #cursor.execute(sql_command)
@@ -37,13 +37,13 @@ cursor.execute(sql_command)
 init_cell=cursor.fetchall()
 print('Distinct Initial Cell IDs are')
 print(init_cell)
-
+print(' ')
 sql_command = """SELECT DISTINCT Final_Cell_ID FROM CDR;""" 
 cursor.execute(sql_command)
 fin_cell=cursor.fetchall()
 print('Distinct Final Cell IDs are')
 print(fin_cell)
-
+print(' ')
 print('Total Distinct Cell IDs are')
 comb=init_cell + fin_cell
 print list(set(comb))
