@@ -6,10 +6,10 @@ connection = sqlite3.connect("cdr_read.db")
 cursor = connection.cursor()
 
 # delete 
-cursor.execute("""DROP TABLE CDR;""")
+
 
 sql_command = """
-CREATE TABLE CDR (
+CREATE TABLE if not exists CDR (
 Date DATE,
 Time_of_communication TIME,
 Initial_Cell_ID INTEGER,
@@ -25,20 +25,19 @@ ndf=ndf.dropna()
 #cursor.execute(sql_command)
 #connection.close()
 
-for row in ndf.iterrows():
-    format_str = """INSERT INTO CDR VALUES ("{first}", "{last}", "{birthdate}","{random}");"""
+ndf.to_sql("CDR", connection, if_exists="replace")
 
-    sql_command = format_str.format(first=row[1][0], last=row[1][1], birthdate = row[1][2],random=row[1][3])
-    cursor.execute(sql_command)
-    connection.commit()
 
-sql_command = """SELECT DISTINCT Initial_Cell_ID FROM CDR;""" 
+
+
+
+sql_command = """SELECT DISTINCT First_Cell_ID FROM CDR;""" 
 cursor.execute(sql_command)
 init_cell=cursor.fetchall()
 print('Distinct Initial Cell IDs are')
 print(init_cell)
 print(' ')
-sql_command = """SELECT DISTINCT Final_Cell_ID FROM CDR;""" 
+sql_command = """SELECT DISTINCT Last_Cell_ID FROM CDR;""" 
 cursor.execute(sql_command)
 fin_cell=cursor.fetchall()
 print('Distinct Final Cell IDs are')
