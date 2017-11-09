@@ -1,6 +1,7 @@
 import pandas as pd
 import math
 import numpy as np
+
 df=pd.read_csv("mnet.csv")
 ndf=df[['Cell_ID','Unique_ID', 'Site_id', 'Latitude','Longitude','Alpha','Cell_Name','City_Town']].copy()
 
@@ -44,20 +45,60 @@ R = 6378.1 #Radius of the Earth
 #def lati()
 ndf=ndf.dropna(axis=0, subset=[['Azimuth']])
 
-lat1=np.arcsin(np.sin(lat)*np.cos(d/R) +np.cos(lat)*np.sin(d/R)*np.cos(np.radians(ndf['Azimuth']+(ndf['Beam_Width']/2))))
-
-lon1=lon + np.arctan2(np.radians(ndf['Azimuth']+ndf['Beam_Width']/2)*np.sin(d/R)*np.cos(lat),np.cos(d/R)-np.sin(lat)*np.sin(lat1))
-
-lat2=np.arcsin( np.sin(lat)*np.cos(d/R) +np.cos(lat)*np.sin(d/R)*np.cos(np.radians(ndf['Azimuth']-ndf['Beam_Width']/2)))
-
-lon2=lon + np.arctan2(np.radians(ndf['Azimuth']-ndf['Beam_Width']/2)*np.sin(d/R)*np.cos(lat),np.cos(d/R)-np.sin(lat)*np.sin(lat2))
 
 
-ndf['lat1']=np.degrees(lat1)
-ndf['lon1']=np.degrees(lon1)
-ndf['lat2']=np.degrees(lat2)
-ndf['lon2']=np.degrees(lon2)
+ndf['wkt']=' ';
 
-ndf['wkt']='POLYGON(('+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+','+ndf['lon1'].map(str)+' '+ndf['lat1'].map(str)+','+ndf['lon2'].map(str)+' '+ndf['lat2'].map(str)+','+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+'))'
+ 
+def segments1(k):
+ global ndf
+ 
+ lat1=np.arcsin(np.sin(lat)*np.cos(d/R) +np.cos(lat)*np.sin(d/R)*np.cos(np.radians(ndf['Azimuth']+(ndf['Beam_Width']/k))))
+
+ lon1=lon + np.arctan2(np.radians(ndf['Azimuth']+ndf['Beam_Width']/k)*np.sin(d/R)*np.cos(lat),np.cos(d/R)-np.sin(lat)*np.sin(lat1))
+
+
+ ndf['lat1']=np.degrees(lat1)
+ ndf['lon1']=np.degrees(lon1)
+ 
+ 
+#ndf['wkt']='POLYGON(('+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+','+ndf['lon1'].map(str)+' '+ndf['lat1'].map(str)+','+ndf['lon2'].map(str)+' '+ndf['lat2'].map(str)+','+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+'))'
+ ndf['wkt']=ndf['wkt'].map(str)+ndf['lon1'].map(str)+' '+ndf['lat1'].map(str)+','
 #new = ndf[['Cell_ID','wkt']].copy()
+ 
+ 
+ return ndf
+
+def segments2(k):
+ global ndf
+ 
+ 
+ lat2=np.arcsin( np.sin(lat)*np.cos(d/R) +np.cos(lat)*np.sin(d/R)*np.cos(np.radians(ndf['Azimuth']-ndf['Beam_Width']/k)))
+
+ lon2=lon + np.arctan2(np.radians(ndf['Azimuth']-ndf['Beam_Width']/k)*np.sin(d/R)*np.cos(lat),np.cos(d/R)-np.sin(lat)*np.sin(lat2))
+
+
+ ndf['lat2']=np.degrees(lat2)
+ ndf['lon2']=np.degrees(lon2)
+
+ 
+#ndf['wkt']='POLYGON(('+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+','+ndf['lon1'].map(str)+' '+ndf['lat1'].map(str)+','+ndf['lon2'].map(str)+' '+ndf['lat2'].map(str)+','+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+'))'
+ ndf['wkt']=ndf['wkt'].map(str)+ndf['lon2'].map(str)+' '+ndf['lat2'].map(str)+','
+#new = ndf[['Cell_ID','wkt']].copy()
+ 
+ 
+ return ndf
+
+dirc=[2,4];
+
+for k in dirc:
+    
+    segments1(k)
+for k in dirc:
+    segments2(k)
+
+#ndf['nwkt']='POLYGON((' + ndf['Long'].map(str)+ndf['Lat'].map(str)+ndf['wkt'].map(str)+ndf['Long'].map(str)+ndf['Lat'].map(str)+'))'
+
+ndf['nwkt']='POLYGON(('+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+','+ndf['wkt'].map(str)+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+'))'
+
 ndf.to_csv('mobnet_processed.csv',index=False)
