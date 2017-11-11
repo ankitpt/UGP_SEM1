@@ -55,7 +55,7 @@ def segments1(k):
  
  lat1=np.arcsin(np.sin(lat)*np.cos(d/R) +np.cos(lat)*np.sin(d/R)*np.cos(np.radians(ndf['Azimuth']+(ndf['Beam_Width']/k))))
 
- lon1=lon + np.arctan2(np.radians(ndf['Azimuth']+ndf['Beam_Width']/k)*np.sin(d/R)*np.cos(lat),np.cos(d/R)-np.sin(lat)*np.sin(lat1))
+ lon1=lon + np.arctan2(np.sin(np.radians(ndf['Azimuth']+ndf['Beam_Width']/k))*np.sin(d/R)*np.cos(lat),np.cos(d/R)-np.sin(lat)*np.sin(lat1))
 
 
  ndf['lat1']=np.degrees(lat1)
@@ -75,7 +75,7 @@ def segments2(k):
  
  lat2=np.arcsin( np.sin(lat)*np.cos(d/R) +np.cos(lat)*np.sin(d/R)*np.cos(np.radians(ndf['Azimuth']-ndf['Beam_Width']/k)))
 
- lon2=lon + np.arctan2(np.radians(ndf['Azimuth']-ndf['Beam_Width']/k)*np.sin(d/R)*np.cos(lat),np.cos(d/R)-np.sin(lat)*np.sin(lat2))
+ lon2=lon + np.arctan2(np.sin(np.radians(ndf['Azimuth']-ndf['Beam_Width']/k))*np.sin(d/R)*np.cos(lat),np.cos(d/R)-np.sin(lat)*np.sin(lat2))
 
 
  ndf['lat2']=np.degrees(lat2)
@@ -89,12 +89,12 @@ def segments2(k):
  
  return ndf
 
-dirc=[2,4];
-
+dirc=[2,8/3.0,4,8];
+dirc2=[8,4,8/3.0,2];
 for k in dirc:
     
     segments1(k)
-for k in dirc:
+for k in dirc2:
     segments2(k)
 
 #ndf['nwkt']='POLYGON((' + ndf['Long'].map(str)+ndf['Lat'].map(str)+ndf['wkt'].map(str)+ndf['Long'].map(str)+ndf['Lat'].map(str)+'))'
