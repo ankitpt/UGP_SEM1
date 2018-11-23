@@ -71,5 +71,5 @@ del comb['END_DATE_wot']
 
 
 comb = comb.sort_values(by=['Date','Time'],ascending=True)
-
+comb=comb[['Date','Time','ID','up','down','Zone','ZONE_','Railway_Br','District','Descriptio','DIVISION']]
 comb.to_csv('result_idea.csv',index=False)

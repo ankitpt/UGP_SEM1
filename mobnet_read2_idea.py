@@ -1,7 +1,10 @@
 import pandas as pd
-
+from shapely.geometry import Polygon
+from shapely.geometry import Point
 import numpy as np
 import math
+from matplotlib.path import Path
+from scipy import spatial
 
 
 df=pd.read_csv("Idea.csv")
@@ -30,7 +33,7 @@ ndf=ndf.rename(columns = {'Site':'SiteName'})
 #ndf['Address']='Bhopal_MP'
 #ndf['Sector_Latitude']=' '
 #ndf['Sector_Longitude']=' '
-ndf['Sector_Radius']=10.0
+ndf['Sector_Radius']=100.0
 
 
 
@@ -52,6 +55,7 @@ ndf=ndf.dropna(axis=0, subset=[['Azimuth']])
 
 
 ndf['wkt']=' ';
+
 #ndf=ndf.sort_values('CellID')
 #ndf['SectorNum']=ndf.groupby(['SiteName']).cumcount()+1
 ndf['Azimuth']= ndf['Azimuth']-(ndf['Azimuth']//360)*360
@@ -106,7 +110,8 @@ ndf['lon1']=np.degrees(lon1)
 #ndf['wkt']='POLYGON(('+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+','+ndf['lon1'].map(str)+' '+ndf['lat1'].map(str)+','+ndf['lon2'].map(str)+' '+ndf['lat2'].map(str)+','+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+'))'
 ndf['wkt']=ndf['wkt'].map(str)+ndf['lon1'].map(str)+' '+ndf['lat1'].map(str)+','
 #new = ndf[['Cell_ID','wkt']].copy()
- 
+ndf['wkt1']=' ';
+ndf['wkt1']= ndf['wkt1'].map(str)+'('+ndf['lon1'].map(str)+','+ndf['lat1'].map(str)+')'+','
  
  #return ndf
 
@@ -144,7 +149,7 @@ for index, row in enumerate(ndf.iterrows()):
 
  
 #ndf['wkt']='POLYGON(('+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+','+ndf['lon1'].map(str)+' '+ndf['lat1'].map(str)+','+ndf['lon2'].map(str)+' '+ndf['lat2'].map(str)+','+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+'))'
-ndf['wkt']=ndf['wkt'].map(str)+ndf['lon2'].map(str)+' '+ndf['lat2'].map(str)+','
+ndf['wkt1']=ndf['wkt1'].map(str)+'('+ndf['lon2'].map(str)+','+ndf['lat2'].map(str)+')'
 #new = ndf[['Cell_ID','wkt']].copy()
  
  
@@ -160,6 +165,35 @@ ndf['wkt']=ndf['wkt'].map(str)+ndf['lon2'].map(str)+' '+ndf['lat2'].map(str)+','
 
 #ndf['nwkt']='POLYGON((' + ndf['Long'].map(str)+ndf['Lat'].map(str)+ndf['wkt'].map(str)+ndf['Long'].map(str)+ndf['Lat'].map(str)+'))'
 
+ndf['nwkt1']='('+'('+ndf['Long'].map(str)+','+ndf['Lat'].map(str)+')'+','+ndf['wkt1'].map(str)+')'
 ndf['nwkt']='POLYGON(('+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+','+ndf['wkt'].map(str)+ndf['Long'].map(str)+' '+ndf['Lat'].map(str)+'))'
+pts=list('('+ndf['Long'].map(str)+','+ndf['Lat'].map(str)+')')
+pts=np.array(tuple((eval(pt)) for pt in pts))
+upts=pd.DataFrame(pts).drop_duplicates().values
+#ndf.to_csv('mobnet_processed_idea.csv',index=False)
 
-ndf.to_csv('mobnet_processed_idea.csv',index=False)
+
+#for poly in polys:
+    
+ #   poly=Polygon(eval(poly))
+    
+  #  npts=[Point(eval(pt)) for pt in pts if(poly.contains(Point(eval(pt))))]
+
+ndf['nwkt1']=ndf['nwkt1'].apply(eval).apply(Path)
+#ndf['pts']=ndf['pts'].apply(eval).apply(Point)
+
+#ndf['npts']=ndf['nwkt1'].ndf['pts'].apply(contains)
+j=0
+for poly in ndf['nwkt1'][0:10]:
+    
+    npts=list()
+    
+    bol=poly.contains_points(upts)
+    npts=upts[np.where(bol==True)]
+    tree=spatial.cKDTree(upts,40,"Arc",6371)
+    dist, ind = tree.query([pts[j]], k=2)
+    j=j+1
+    
+    
+
+
